@@ -1,0 +1,192 @@
+-------Experiment No 6-----------------------------------
+close all;
+clear;
+
+fp = 1500; tw = 500; fs = 8000;
+tw = tw / fs; fc = fp / fs + tw / 2;
+N = floor(0.9 / tw); n = -(N-1)/2:(N-1)/2 + 0.00001;
+
+h_rect = sinc(2 * fc * n);
+subplot(4, 2, 1);
+stem(n, h_rect);
+title('LPF with Rectangular Window');
+xlabel('n');
+ylabel('hd');
+[X_rect, w_rect] = freqz(h_rect, 1, 1024);
+subplot(4, 2, 2);
+plot(w_rect/pi, 20 * log10(abs(X_rect) / max(abs(X_rect))));
+title('Freq Response - Rectangular');
+xlabel('Normalized f');
+ylabel('Magnitude (dB)');
+
+triangular = 1 - abs(n / ((N-1)/2));
+h_tri = sinc(2 * fc * n) .* triangular;
+subplot(4, 2, 3);
+stem(n, h_tri);
+title('LPF with Triangular Window');
+xlabel('n');
+ylabel('hd');
+[X_tri, w_tri] = freqz(h_tri, 1, 1024);
+subplot(4, 2, 4);
+plot(w_tri/pi, 20 * log10(abs(X_tri) / max(abs(X_tri))));
+title('Freq Response - Triangular');
+xlabel('Normalized f');
+ylabel('Magnitude (dB)');
+
+
+
+--------Experiment 7-----------------------------------------
+clc;
+clear;
+
+rp = input('Enter the passband ripple (e.g., 0.02): ');
+rs = input('Enter the stopband attenuation (e.g., 0.01): ');
+fp = input('Enter the passband frequency (1500Hz): ');
+fs = input('Enter the stopband frequency (2000Hz): ');
+f = input('Enter the sampling frequency (6000Hz): ');
+
+wp = 2 * fp / f; ws = 2 * fs / f;
+
+n = ceil((-20 * log10(sqrt(rp * rs)) - 13) / (14.6 * (fs - fp) / f));
+if mod(n, 2) ~= 0, n = n + 1; end
+
+windows = {'Hamming', hamming(n + 1); 'Hanning', hann(n + 1)};
+for i = 1:size(windows, 1)
+    b = fir1(n, wp, 'high', windows{i, 2});
+    [h, w] = freqz(b, 1, 256);
+    figure; plot(w / pi, 20 * log10(abs(h)));
+    title(['FIR Filter Response using ', windows{i, 1}, ' Window']);
+    xlabel('Normalized Frequency (\times\pi rad/sample)');
+    ylabel('Gain (dB)');
+end
+
+
+
+----------Experiment 8-------------------------------
+clc;
+clear;
+close all;
+
+fp1 = input('Enter passband edge frequency 1(150): ');
+fp2 = input('Enter passband edge frequency 2(250): ');
+df1 = input('Enter transition width(100): ');
+fs = input('Enter sampling frequency(1200): ');
+att = input('Enter Stopband attenuation(20): ');
+rip = input('Enter Passband ripple(3): ');
+L = input('Enter L(25): ');
+
+fp = fp1 / fs; fpp = fp2 / fs; df = df1 / fs;
+dp = 10^(rip/20) - 1; ds = 10^(-att/20); d = min(dp, ds);
+A = -20 * log10(d);
+
+beta = 0;
+if A > 21 && A <= 50, beta = 0.5842 * (A-21)^0.4 + 0.07886 * (A-21); 
+elseif A > 50, beta = 0.1102 * (A-8.7); end
+
+N = ceil((A - 7.95) / (14.36 * df));
+if mod(N, 2) == 0, N = N + 1; end
+
+n = -(N-1)/2:(N-1)/2;
+w = besseli(0, beta * sqrt(1 - (2 * n / (N-1)).^2)) ./ besseli(0, beta);
+
+f1 = fp + df / 2; f2 = fpp + df / 2;
+hd = (2 * f2 * sinc(2 * f2 * n)) - (2 * f1 * sinc(2 * f1 * n));
+h = hd .* w;
+
+f_axis = (0:999) * (fs / 1000); 
+subplot(2, 1, 1);
+plot(f_axis, 20 * log10(abs(fft(w, 1000)) / max(abs(fft(w, 1000)))));
+title('Kaiser Window Response');
+xlabel('Frequency (Hz)'); ylabel('Magnitude (dB)');
+
+subplot(2, 1, 2);
+plot(f_axis, 20 * log10(abs(fft(h, 1000)) / max(abs(fft(h, 1000)))));
+title('Filter Response');
+xlabel('Frequency (Hz)'); ylabel('Magnitude (dB)');
+
+
+
+--------------------Experiment 9--------------------------------------------
+clc; clear; close all;
+
+wp = 0.2 * pi; ws = 0.3 * pi;
+Rp = 1; As = 15;
+T = 1;
+
+OmegaP = wp / T; OmegaS = ws / T;
+
+[N, Wc] = buttord(OmegaP, OmegaS, Rp, As, 's');
+[b_a, a_a] = butter(N, Wc, 's');
+[b_d, a_d] = impinvar(b_a, a_a, 1/T);
+
+[H, w] = freqz(b_d, a_d, 1024);
+
+figure; plot(w/pi, abs(H), 'r');
+xlabel('\omega (Normalized by \pi)'); ylabel('|H(\omega)|');
+title('Magnitude Response'); grid on;
+
+figure; plot(w/pi, angle(H)/pi, 'g');
+xlabel('\omega (Normalized by \pi)'); ylabel('Phase (radians/\pi)');
+title('Phase Response'); grid on;
+
+
+------------Experiment 10-------------------------------------
+% i) sinusoidal sequence of user input normalized frequency
+
+N=51;
+n=0:N-1;
+N_Freq1=input('Enter the value of normalized frequency1(0.15Hz): ');
+x1=sin(2*pi*N_Freq1*n);
+N_Freq2=input('Enter the value of normalized frequency2(0.1Hz): ');
+N_Freq3=input('Enter the value of normalized frequency3(0.3Hz): ');
+x2=sin(2*pi*N_Freq2*n)+sin(2*pi*N_Freq3*n);
+M=input('Value of down sampling factor(5): ');
+y1=downsample(x1,M);
+L1=length(y1);
+y2=downsample(x2,M);
+L2=length(y2);
+subplot(2,2,1);
+stem(0:N-1,x1(1:N));
+title('x1(n)');
+subplot(2,2,2);
+stem(0:N-1,x2(1:N));
+title('x2(n)');
+subplot(2,2,3);
+stem(0:L1-1,y1(1:L1));
+title('downsampled x1(n)');
+subplot(2,2,4);
+stem(0:L2-1,y2(1:L2));
+title('downsampled x2(n)');
+
+
+
+% ii) sum of two sinusoids with multiple normalized frequency.
+
+N=51;
+n=0:N-1;
+N_Freq1=input('Enter the value of normalized frequency1(0.15Hz): ');
+x1=sin(2*pi*N_Freq1*n);
+N_Freq2=input('Enter the value of normalized frequency2(0.1Hz): ');
+N_Freq3=input('Enter the value of normalized frequency3(0.3Hz): ');
+x2=sin(2*pi*N_Freq2*n)+sin(2*pi*N_Freq3*n);
+M=input('Value of down sampling factor(5): ');
+y1=downsample(x1,M);
+L1=length(y1);
+y2=downsample(x2,M);
+L2=length(y2);
+subplot(2,2,1);
+stem(0:N-1,x1(1:N));
+title('x1(n)');
+subplot(2,2,2);
+stem(0:N-1,x2(1:N));
+title('x2(n)');
+subplot(2,2,3);
+stem(0:L1-1,y1(1:L1));
+title('downsampled x1(n)');
+subplot(2,2,4);
+stem(0:L2-1,y2(1:L2));
+title('downsampled x2(n)');
+
+
+
+
