@@ -1,0 +1,709 @@
+---------------------------------------------------------------------Experiment 1------------------------------------------------------------------------------------
+(A)
+clc 
+clear all
+n= -20:1:20;
+
+u= sign(n);
+v= (n>=0);
+w= (n==0);
+
+subplot(2,3,1);
+stem(n,u,'r');
+xlabel('n');
+ylabel('x[n]');
+title('Signum Function','FontSize',10);
+
+
+subplot(2,3,2);
+stem(n,v,'g');
+xlabel('n');
+ylabel('x[n]');
+title('Unit Step Function', 'FontSize',10);
+
+
+subplot(2,3,3);
+stem(n,w, 'b');
+xlabel('n');
+ylabel('x[n]');
+title('Unit Impulse function', 'FontSize',10);
+
+(B)
+clc
+clear all
+sf= 300;
+n= -0.5:1/sf:0.5;
+f= input('fr');
+d= input('duty cycles');
+u= square(2*pi*f*n,d);
+subplot(2,2,1);
+stem(n,u,'r');
+xlabel('n');
+ylabel('x[n]');
+title('Square Function','FontSize',16);
+
+subplot(2,2,2);
+plot(n,u);
+xlabel('n');
+ylabel('x[n]');
+title('Square Waveform', 'FontSize',16);
+
+(C)
+clc 
+close all;
+
+n= -1:0.01:1;
+f= input('Frequency');
+amp= input('Amplitude');
+phase= input('Phase');
+u= amp*sin(2*pi*f*n+ phase);
+
+subplot(2,2,1);
+stem(n,u);
+xlabel('n');
+ylabel('x[n]');
+title('Sinusoidal Function');
+
+subplot(2,2,2);
+plot(n,u);
+xlabel('n');
+ylabel('x[n]');
+title('Sinusoidal Waveform');
+
+-------------------------------------------------------------------------Experiment 2------------------------------------------------------------------------------
+clc
+close all
+n= 0:4;
+x= (n>=0)- (n>=4);
+subplot(2,2,1);
+stem(n,x);
+xlabel('n');
+ylabel('x[n]');
+title('Conv1');
+subplot(2,2,2);
+n= 0:8;
+y= n.*(n>=0)- 2.*(n-4).*(n>=4)+ (n-8).*(n>=8);
+stem(n,y);
+xlabel('n');
+ylabel('y[n]');
+title('Conv2');
+l1= length(x);
+l2= length(y);
+X= [x, zeros(1,10)];
+Y= [y, zeros(1,6)];
+for i= 1: (l1+l1-1)
+    C(i)= 0
+    for j= 1:i
+        C(i)= C(i)+ X(j).*Y(i-j+1);
+    end
+end
+subplot(2,2,3);
+stem(C);
+xlabel('n');
+ylabel('C[n]');
+title('Linear Convolution');
+
+--------------------------------------------------------------------------Experiment 3-----------------------------------------------------------------------------
+x= [2 2 1 1 2];
+N= length(x);
+X= zeros(5,1);
+for k= 0:N-1
+    for n= 0:N-1
+        X(k+1)= X(k+1)+ x(n+1)*exp((-1i)*pi/2*n*k);
+    end
+end
+i= length(x);
+r= zeros(5,1);
+for a= 0:N-1
+    for b= 0:N-1
+        r(a+1)= r(a+1)+ x(b+1)*exp((1i)*pi/2*b*a);
+    end
+end
+t= 0:N-1
+subplot(2,2,1);
+stem(t,abs(X));
+xlabel('Frequency');
+ylabel('|X(k)|');
+title('DFT Magnitude');
+subplot(2,2,2);
+stem(t,angle(X));
+xlabel('Frequency');
+ylabel('phase(inv)');
+title('DFT Phase');
+subplot(2,2,3);
+stem(t,abs(r));
+xlabel('Frequency');
+ylabel('|inv(X)|');
+title('IDFT Magnitude');
+subplot(2,2,4);
+stem(t, angle(r));
+xlabel('Frequency');
+ylabel('Phase');
+title('IDFT Phase');
+disp('OG')
+disp(x)
+disp('NG')
+disp(r)
+
+-------------------------------------------------------------------------------Experiment 4------------------------------------------------------------------------
+(A)
+clc;
+close all;
+X= input('enter the First sequence');
+H= input('Enter the second sequence');
+N1= length(X);
+N2= length(H);
+x= [X, zeros(1, N2-1)];
+h= [H, zeros(1, N1-1)];
+N= max(N1, N2);
+for m= 1: N
+    y(m)= 0;
+    for n= 1:N
+        y(m)= y(m)+ x(n)*h((mod(m-n, N)+1));
+    end
+end
+circonv= cconv(x,h,N);
+y
+
+(B)
+clc;
+close all;
+X= input('enter the First sequence');
+H= input('Enter the second sequence');
+N1= length(X);
+N2= length(H);
+x= [X, zeros(1, N2-1)];
+h= [H, zeros(1, N1-1)];
+N= max(N1, N2);
+for m= 1: N
+    y(m)= 0;
+    for n= 1:N
+        y(m)= y(m)+ x(n)*h((mod(m-n, N)+1));
+    end
+end
+linconv= cconv(x,h,N);
+y
+
+(C)
+clc
+close all;
+X= input('Enter the first sequence');
+H= input('Enter the second sequence');
+N1= length(X);
+N2= length(H);
+Nl= N1+ N2- 1;
+N= max(N1, N2);
+y= conv(X,H);
+y1= y(1:N);
+y2= [ y(N+1:Nl), zeros(1: Nl-N)];
+for i= 1:N
+    C(i)= y1(i)+ y2(i)
+end
+C
+circonv= cconv(X,H,N)
+
+(D)
+clc
+close all;
+X= input("Enter the first sequence");
+H= input("Enter the second sequence");
+N1= length(X);
+N2= length(H);
+N= max(N1, N2);
+y1= fft(X,N);
+y2= fft(H,N);
+y= y1.*y2;
+C= ifft(y)
+circonv= cconv(X,H,N)
+
+------------------------------------------------------------------------Experiment 5-------------------------------------------------------------------------------
+a)rectangular
+%RishabdevDhawan
+M=input('Enter the value of M: ');
+N=input('Enter the value of N: ');
+w1=linspace(0,pi,1000);
+t1=(0:1:M-1);
+A1=ones(1,M);
+stem(t1,A1);
+xlabel('------> n ------>');
+ylabel('Amplitude ------>');
+figure
+[H1,w1]=freqz(A1,1,1024);
+wN1=w1./(2*pi);
+HN1=abs(H1)./max(abs(H1));
+plot(wN1,20*log10(HN1),'b')
+grid
+xlabel('Normalizied frequency --------->')
+ylabel('Normalized Magnitude response (dB) ----->')
+title('Frequency response of rectangular window function')
+hold on
+t2=(0:1:N-1);
+A2=ones(1,N);
+[H2,w2]=freqz(A2,1,1024);
+wN2=w2./(2*pi);
+HN2=abs(H2)./max(abs(H2));
+plot(wN2,20*log10(HN2),'r')
+hold off
+legend('M=25', 'N=49');
+
+b)Blackman
+%RishabdevDhawan
+M=input('enter the value of M: ');
+N=input('enter the value of N: ');
+t1=(0:1:M-1);
+A1=0.42 - 0.5.*cos((2.*pi.*t1)./(M-1)) + 0.08.*cos((4.*pi.*t1)./(M-1));
+stem(t1,A1);
+xlabel('------> n ------>');
+ylabel('Amplitude ------>');
+figure
+[H1,w1]=freqz(A1,1,1024);
+wN1=w1./(2*pi);
+HN1=abs(H1)./max(abs(H1));
+plot(wN1,20.*log10(HN1),'b')
+grid
+xlabel('Normalizied frequency --------->')
+ylabel('Normalized Magnitude response (dB) ----->')
+title('Frequency response of Blackman window function')
+hold on
+t2=(0:1:N-1);
+A2=0.42 - 0.5.*cos((2.*pi.*t2)./(N-1)) + 0.08.*cos((4.*pi.*t2)./(N-1));
+[H2,w2]=freqz(A2,1,1024);
+wN2=w2./(2*pi);
+HN2=abs(H2)./max(abs(H2));
+plot(wN2,20.*log10(HN2),'r')
+hold off;
+legend('M=25', 'N=49');
+
+c)Hamming
+%RishabdevDhawan
+M=input('enter the value of M: ');
+N=input('enter the value of N: ');
+t1=(0:1:M-1);
+A1=0.54 - 0.46.*cos((2.*pi.*t1)./(M-1));
+stem(t1,A1);
+xlabel('------> n ------>');
+ylabel('Amplitude ------>');
+figure
+[H1,w1]=freqz(A1,1,1024);
+wN1=w1./(2*pi);
+HN1=abs(H1)./max(abs(H1));
+plot(wN1,20.*log10(HN1),'b')
+grid
+xlabel('Normalizied frequency --------->')
+ylabel('Normalized Magnitude response (dB) ----->')
+title('Frequency response of Hamming window function')
+hold on
+t2=(0:1:N-1);
+A2=0.54 - 0.46.*cos((2.*pi.*t2)./(N-1));
+[H2,w2]=freqz(A2,1,1024);
+wN2=w2./(2*pi);
+HN2=abs(H2)./max(abs(H2));
+plot(wN2,20.*log10(HN2),'r')
+hold off;
+legend('M=25', 'N=49');
+
+d)Hanning
+%RishabdevDhawan
+M=input('enter the value of M: ');
+N=input('enter the value of N: ');
+t1=(0:1:M-1);
+A1=0.5.*(1-cos((2.*pi.*t1)./(M-1)));
+stem(t1,A1);
+xlabel('------> n ------>');
+ylabel('Amplitude ------>');
+figure
+[H1,w1]=freqz(A1,1,1024);
+wN1=w1./(2*pi);
+HN1=abs(H1)./max(abs(H1));
+plot(wN1,20.*log10(HN1),'b')
+grid
+xlabel('Normalizied frequency --------->')
+ylabel('Normalized Magnitude response (dB) ----->')
+title('Frequency response of Hanning window function')
+hold on
+t2=(0:1:N-1);
+A2=0.5.*(1-cos((2.*pi.*t2)./(N-1)));
+[H2,w2]=freqz(A2,1,1024);
+wN2=w2./(2*pi);
+HN2=abs(H2)./max(abs(H2));
+plot(wN2,20.*log10(HN2),'r')
+hold off;
+legend('M=25', 'N=49');
+
+------------------------------------------------------------------------------Experiment 6-------------------------------------------------------------------------
+%{
+AIM: To design FIR Low Pass Filter using Rectangular and Triangular windows with user input 
+specifications for pass band edge frequency, transition width, stop band attenuation and 
+sampling frequency.
+Name: Navneet Kumar Sharma
+Roll No: 102215082
+Group No: 3O2B
+Code of Experiment No-6
+%}
+%RECTANGULAR
+close all;
+clear all;
+fp=1500;
+tw=500;
+fsample=8000;
+tw=tw/fsample;
+fc=fp+tw/2;
+N=floor(0.9/tw);
+h=ones(1,N);
+hd=ones(1,N);
+for i=1:N
+ a(i)=(-(N-1)/2-1)+i;
+end
+rectangular=ones(1,N);
+for i=1:N
+ wc=2*pi*fc;
+ h(i)=sin(a(i)*wc)/(a(i)*wc);
+ hd(i)=h(i)*rectangular(i);
+end
+subplot(4,2,1);
+stem(a,hd);
+title('LPF with Rectangular Window');
+xlabel('t');
+ylabel('hd');
+[X2,w2]=freqz(hd,1,1024);
+X2max=max(abs(X2));
+subplot(4,2,2);
+plot(w2/pi,20*log10(abs(X2)/X2max));
+title('LPF with Rectangular Window Freq Response');
+xlabel('f');
+ylabel('hd');
+
+
+%TRIANGULAR
+close all;
+clear all;
+fp=1500;
+tw=500;
+fsample=8000;
+tw=tw/fsample;
+fc=fp+tw/2;
+N=floor(0.9/tw);
+a=[zeros(1,N)];
+for i=1:N
+ a(i)=(-(N-1)/2-1)+i;
+end
+a(i)=a(i)+0.00001;
+n=-(N-1)/2:(N-1)/2
+triangular=(1-abs(n)/(N-1)/2);
+for i=1:N
+ wc=2*pi*fc;
+ h(i)=2*fc*sin(a(i)*wc)/(a(i)*wc)
+ hd(i)=h(i)*triangular(i);
+end
+subplot(5,2,1);
+stem(a,hd);
+title('LPF with trinagulars Window');
+xlabel('t');
+ylabel('hd');
+[X2,w2]=freqz(hd,1,1024);
+X2max=max(abs(X2));
+subplot(4,2,2);
+plot(w2/2*pi,20*log10(abs(X2)/X2max));
+title('LPF with triangular Window Freq Response');
+xlabel('f');
+ylabel('hd');
+
+-----------------------------------------------------------------------------Experiment 7--------------------------------------------------------------------------
+%{
+AIM: To design FIR Low Pass Filter using Hamming and hanning windows with user input specifications 
+for pass band edge frequency, transition width, stop band attenuation and sampling frequency
+Name: Navneet Kumar Sharma
+Roll No: 102215082
+Group No: 3O2B
+Code of Experiment No-7
+%}
+clc;
+clear all;
+rp=input('enter the passband ripple:');%0.02
+rs=input('enter the stopband attenuation:');%0.01
+fp=input('enter the passband freq:'); %1500
+fs=input('enter the stopband freq:');%2000
+f=input('enter the sampling freq:');%6000
+wp=2*fp/f;
+ws=2*fs/f;
+num=-20*log10(sqrt(rp*rs))-13;
+dem=14.6*(fs-fp)/f;
+n=ceil(num/dem);
+n1=n+1;
+if (rem(n,2)~=0)
+n1=n;
+n=n-1;
+end
+y1=hamming(n1);
+y2=hann(n1);
+% high-pass filter
+%hamming
+b=fir1(n,wp,'high',y1);
+[h,o]=freqz(b,1,256);
+m=20*log10(abs(h));
+figure;plot(o/pi,m);
+title('FIR Filter Response using hamming window ');
+ylabel('Gain in dB');
+xlabel('Normalised frequency');
+%hanning
+b=fir1(n,wp,'high',y2);
+[h,o]=freqz(b,1,256);
+m=20*log10(abs(h));
+figure;plot(o/pi,m);
+title('FIR Filter Response using Hanning window ');
+ylabel('Gain in dB');
+xlabel('Normalised frequency');
+
+---------------------------------------------------------------------------Experiment 8----------------------------------------------------------------------------
+%{
+AIM: Write a MATLAB program to design FIR BANDPASS filter using Kaiser windows 
+with the user input specifications for pass band range, transition width, passband ripple, 
+stop band attenuation and sampling frequency.
+Name: Navneet Kumar Sharma
+Roll No: 102215082
+Group No: 3O2B
+Code of Experiment No-8
+%}
+clc
+clear all
+fp1=input('Enter passband edge frequency 1: ');
+fp2=input('Enter passband edge frequency 2: '); 
+df1=input('Enter transition width: ');
+fs=input('Enter sampling frequency: ');
+att=input('Enter Stopband attenuation: ');
+rip=input('Enter Passband ripple: ');
+L=input('Enter L: ');
+fp=fp1/fs; 
+fpp=fp2/fs;
+df=df1/fs; 
+dp=(10.^(rip/20))-1;
+ds=(10.^(-att/20));
+d=min(dp,ds);
+A=-20*log10(d);
+if A<=21
+beta=0;
+elseif A>=21 && A<=50
+beta=0.584*((A-21)^0.4)+0.07886*(A-21);
+else
+beta=0.1102*(A-8.7);
+end
+X=(A-7.95)/(14.36*df);
+N=ceil(X);
+if mod(N,2) == 0 N=N+1;
+else N=N;
+end
+for n=-(N-1)/2:(N-1)/2
+x(n+((N-1)/2)+1)=beta*((1-(2*n/(N-1))^2))^0.5;
+x1(n+((N-1)/2)+1)=beta;
+for k=1:L
+y(k)=((((x(n+((N-1)/2)+1)/2).^k)./factorial(k)).^2); 
+end
+Y(n+((N-1)/2)+1)=sum(y);
+for k=1:L
+y1(k)=((((x1(n+((N-1)/2)+1)/2).^k)./factorial(k)).^2);
+end
+Y1(n+((N-1)/2)+1)=sum(y1);
+I(n+((N-1)/2)+1)=1+Y(n+((N-1)/2)+1);
+I1(n+((N-1)/2)+1)=1+Y1(n+((N-1)/2)+1);
+end
+w=I./I1;
+f1=fp+df/2; 
+f2=fpp+df/2;
+h1=2*(f2-f1);
+for n=1:(N-1)/2
+h2(n)=(((2*f2)*sin(2*n*pi*f2))/(2*n*pi*f2))-(((2*f1)*sin(2*n*pi*f1))/(2*n*pi*f1));
+end
+h3=fliplr(h2);
+hd=[h3 h1 h2]; 
+hh=hd.*w;
+subplot(2,1,1);
+[x2]=fft(w,1000);
+a2=(20*log10(abs(x2)/max(x2))); y1=(0:1000-1).*(2*pi/fs);
+plot(y1,a2)
+title('Kaiser Window Response')
+xlabel('Normalized Frequency') 
+ylabel('Magnitude in dB')
+subplot(2,1,2);
+[x3]=fft(hh,1000);
+a3=(20*log10(abs(x3)/max(x3)));
+plot(y1,a3)
+title('Filter Response')
+xlabel('Normalized Freuqency') 
+ylabel('Magnitude in dB')
+
+values: 150; 250; 100; 1200; 20; 0.01
+
+---------------------------------------------------------------------------Experiment 9----------------------------------------------------------------------------
+function [b,a] = afd_butt (Wp,Ws,Rp,As) ;
+% X Analog Lowpass Filter Design: Butterworth
+% y
+% [b,a] = afd-butt(Wp,Ws,Rp.As);
+% % b = Numerator coefficients of Hab)
+% X a = Denominator coefficients of Ha(d
+% % Wp = Passband. edge frequency in rad/sec; Wp > 0
+% X Ws = Stopband edge frequency in rad/sec; Ws > Wp > 0
+% Rp = Passband ripple in +dB; (Rp > 0)
+% As = Stopband attenuation in +dB; (As > 0)
+% X
+if Wp<=0
+error('Passband edge must be larger than 0')
+end
+if Ws <= Wp
+error('Stopband edge must be larger than Passband edge') 
+end
+if (Rp <= 0) | (As < 0)
+error('PB ripple and/or SB attenuation ust be larger than 0')
+end
+N =ceil((log10((10^(Rp/10)-1)/(10^(As/10)-1)))/(2*log10(Wp/Ws)));
+disp('N')
+disp(N)
+OmegaC = Wp/((10^(Rp/10)-1)^(1/(2*N))) ; 
+[b,a]=U_buttap(N,OmegaC) ;
+ function [C,B,A] = dir2par(b,a);
+% X Dim-form to PWLEL-form conversion
+% y. S
+% % CC,B,Al = dir2par(b,a)
+% X C = Polynomial part when length(b1 >= length(a1
+% X B = K by 2 matrix of real coefficients containing bk's;
+% X A = K by 3 matrix of real coefficients containing ak's;
+% X b = numerator polynomial coefficients of DIRECT form
+% X a = denominator polynomial coefficients of DIRECT form
+% X 
+M = length(b) ; N = length(a); [rl ,p1 ,C] = residuez(b,a) ;
+p = cplxpair (p1,10000000*eps) ; I = cplxcomp(p1,p) ; r = rl(I);
+K = floor(N/2); B = zeros(K,2); A = zeros(K,3);
+if K*2 == N; %W even, order of A(z) odd, one factor is first 
+order for i=1:2:N-2
+Brow = r(i:1:i+1,:);
+Arow = p(i:1:i+1,:);
+[Brow,Arow] = residuez(Brow,Arow,[]); B(fix((i+1)/2),:) = real(Brow) ;
+A(fix((i+1)/2), :) = real(Arow); end [Brow,Arow] = residuez(r(N-1) 
+,p(N-1), []) ;
+B(K,:) = [real(Brow) 0]; A(K,:) = [real(Arow) 0]; else
+for i=1:2:N-1
+Brow = r(i:1:i+1,:);
+Arow = p(i:1:i+1,:);
+[Brow Arow] = residuez(Brow, Arow, [] ) ; B(fix((i+1)/2), :) = real(Brow) 
+;
+A(fix((i+1)/2), :) = real(Arow); end end
+function [b,a] = imp_invr(c,d,T)
+% X Impulse Invariance Transformation from Analog to Digital Filter
+%X 
+% X [b,d = imp-invr(c,d,T)
+% X b = Numerator polynomial in f(-1) of the digital filter
+% X a = Denominator polynomial in 2-(-1) of the digital filter
+% X c = Numerator polynomial in s of the analog filter
+% X d = Denominator polynomial in s of the analog filter
+% X T = Sampling (transformation) parameter
+% X
+[R,p,k] = residue(c,d);
+p = exp(p*T);
+[b a] = residuez(R,p,k) ;
+b = real(b'); 
+a = real(a');
+ function I = cplxcomp(p1,p2)
+% I = cplxcomp(pl,p2)
+% X Compares two complex pairs which contain the same scalar elements
+% but (possibly) at diffenent indices. This routine should be
+% used after CPLXPAIR routine for rearranging pole vector and its
+% corresponding residue vector.
+% p2 = cplxpair(p1) I=[] ;
+for j=1: 1:length(p2) for i=1: 1: length(p1) if (abs(p1(i)-p2(j)) < 
+0.0001) I=[I,i];
+ end
+ end
+end
+I=I' ;
+function [b,a] = U_buttap(N,Omegac) ;
+% X Unnormalized Butterworth Analog Lowpass Filter Prototype
+% X [b,al = U-buttap(N,Gmegac) ;
+% % b = numerator polynomial coefficients of Hab)
+% % a = denominator polynomial coefficients of Hab)
+% % N = Order of the Butternorth Filter
+% % hegac = Cutoff frequency in radians/sec
+% X
+[z p k]=buttap(N); p=p*Omegac; k=k*Omegac^N; B=real(poly(z)); b0=k;
+b=k*B; a=real(poly(p));
+% MAIN PROGRAM
+clc;
+clear all; 
+close all;
+wp = 0.2*pi;
+%digital Passband freq in rad ws = 0.3*pi; 
+%digital Stopband freq in rad Rp = 1; 
+%Passband ripple in dB
+As = 15;
+%Stopband attenuation in dB
+% Analog Prototype Specifications:
+T = 1;
+%Set T=1 OmegaP = wp/T; 
+% Prototype Passband freq OmegaS = ws/T;
+% Prototype Stopband freq
+% Analog Prototype Order Calculation: 
+[cs,ds]=afd_butt(OmegaP,OmegaS,Rp, As); 
+[b,a] = imp_invr(cs,ds,T);
+[C B A]=dir2par(b,a) [X2,w2] = freqz(b,a,1024);
+X2max = max(abs(X2)); 
+plot(w2/(pi),(abs(X2)),'r'); 
+%Plotting the graph
+%giving xlabel and ylabel and title
+xlabel('-------- \bf\omega (Normalized w.r.t \pi)>');
+ylabel('-------- \bf|H(w)| (Normalized w.r.t.
+Max(h(w)))'); title('Magnitude Response'); grid
+figure plot(w2/(pi),angle(X2)/(pi),'g');
+xlabel('-------- \bf\omega (Normalized w.r.t \pi)>');
+ylabel('-------- \bfphase (Normalized w.r.t. \pi)>');
+title('Phase Response');
+
+-----------------------------------------------------------------------------Experiment 10-------------------------------------------------------------------------
+(A)
+N=51;
+n=0:N-1;
+N_Freq1=input('Enter the value of normalized frequency1: '); 
+x1=sin(2*pi*N_Freq1*n);
+N_Freq2=input('Enter the value of normalized frequency2: '); 
+N_Freq3=input('Enter the value of normalized frequency3: ');
+x2=sin(2*pi*N_Freq2*n)+sin(2*pi*N_Freq3*n);
+M=input('Value of down sampling factor: ');
+y1=downsample(x1,M);
+L1=length(y1);
+y2=downsample(x2,M);
+L2=length(y2);
+subplot(2,2,1);
+stem(0:N-1,x1(1:N));
+title('x1(n)');
+subplot(2,2,2);
+stem(0:N-1,x2(1:N));
+title('x2(n)');
+subplot(2,2,3);
+stem(0:L1-1,y1(1:L1));
+title('downsampled x1(n)');
+subplot(2,2,4);
+stem(0:L2-1,y2(1:L2));
+title('downsampled x2(n)');
+(B)
+n=0:N-1;
+N_Freq1=input('Enter the value of normalized frequency1: ');
+x1=sin(2*pi*N_Freq1*n);
+N_Freq2=input('Enter the value of normalized frequency2: '); 
+N_Freq3=input('Enter the value of normalized frequency3: ');
+x2=sin(2*pi*N_Freq2*n)+sin(2*pi*N_Freq3*n);
+M=input('Value of up sampling factor: ');
+y1=upsample(x1,M);
+L1=length(y1);
+y2=upsample(x2,M);
+L2=length(y2);
+subplot(2,2,1);
+stem(0:N-1,x1(1:N));
+title('x1(n)');
+subplot(2,2,2);
+stem(0:N-1,x2(1:N));
+title('x2(n)');
+subplot(2,2,3);
+stem(0:L1-1,y1(1:L1));
+title('upsampled x1(n)');
+subplot(2,2,4);
+stem(0:L2-1,y2(1:L2));
+title('upsampled x2(n)');
+
+same values for both part: 0.15; 0.1; 0.3; 5
